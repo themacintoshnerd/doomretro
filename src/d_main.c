@@ -82,6 +82,8 @@
 
 #if !defined(__OpenBSD__) && !defined(__HAIKU__)
 #include <wordexp.h>
+#include <sys/stat.h>
+
 #endif
 #endif
 
@@ -507,6 +509,8 @@ static short    logox;
 static short    logoy;
 static short    logowidth;
 static short    logoheight;
+
+char* soundfont;
 
 //
 // D_PageTicker
@@ -1203,6 +1207,21 @@ static bool D_AutoloadOtherKDIKDIZDWAD(void)
     return false;
 }
 
+
+void M_LoadSF(int argi){
+    if(argi >= myargc - 1) {
+        printf("Please provide a soundfont file path.");
+        return;
+    }
+    char* filename = myargv[argi + 1];
+    struct stat buffer;
+    if(stat(filename, &buffer) != 0){
+        printf("Soundfont file does not exist.");
+        return;
+    }
+    soundfont = filename;
+}
+
 static bool D_CheckParms(void)
 {
     bool    result = false;
@@ -1348,7 +1367,13 @@ static bool D_CheckParms(void)
 
         free(folder);
     }
+    //initialize to placeholder
+    soundfont = "\0";
 
+    int argi = -1;
+    if((argi = M_CheckParmWithArgs("-sfont", 1))){
+        M_LoadSF(argi);
+    }
     return result;
 }
 

@@ -56,6 +56,8 @@ extern int      pagetic;
 extern int      titlesequence;
 extern int      fadecount;
 
+extern char *soundfont;
+
 #if defined(_WIN32)
 extern char     *previouswad;
 #endif
