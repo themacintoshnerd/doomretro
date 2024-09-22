@@ -167,6 +167,9 @@ static void InitMusicModule(void)
         C_Warning(1, "Music couldn't be %s.", (english == english_american ? "initialized" : "initialised"));
         nomusic = true;
     }
+    //set the soundfont, if one was provided
+    if(soundfont[0] != '\0')
+        Mix_SetSoundFonts(soundfont);
 }
 
 //
