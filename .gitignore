@@ -147,3 +147,4 @@ DerivedData/
 src/doomretro
 *.db
 *.layout
+.vscode/launch.json
