@@ -602,9 +602,7 @@ valuealias_t valuealiases[] =
     { "off",            0,                     SUCKSVALUEALIAS     },
     { "imperial",       units_imperial,        UNITSVALUEALIAS     },
     { "metric",         units_metric,          UNITSVALUEALIAS     },
-#if !defined (__APPLE__)
-    { "adaptive",       vid_vsync_adaptive,    VSYNCVALUEALIAS     },
-#endif
+ //   { "adaptive",       vid_vsync_adaptive,    VSYNCVALUEALIAS     },
     { "off",            vid_vsync_off,         VSYNCVALUEALIAS     },
     { "on",             vid_vsync_on,          VSYNCVALUEALIAS     },
     { "fists",          wp_fist,               WEAPONVALUEALIAS    },
