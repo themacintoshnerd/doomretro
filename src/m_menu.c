@@ -2487,6 +2487,12 @@ static void M_SizeDisplay(int choice)
             {
                 r_hud = true;
                 C_StringCVAROutput(stringize(r_hud), "on");
+
+                if (r_althud)
+                {
+                    r_althud = false;
+                    C_StringCVAROutput(stringize(r_althud), "off");
+                }
             }
 
             S_StartSound(NULL, sfx_stnmov);
@@ -3461,6 +3467,12 @@ bool M_Responder(event_t *ev)
                 {
                     r_hud = false;
                     C_StringCVAROutput(stringize(r_hud), "off");
+                }
+
+                if (r_althud)
+                {
+                    r_althud = false;
+                    C_StringCVAROutput(stringize(r_althud), "off");
                 }
             }
 
