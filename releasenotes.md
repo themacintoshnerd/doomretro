@@ -3,7 +3,7 @@
 ### DOOM Retro v5.6
 
 * *DOOM Retro* is now built using v17.11.4 of [*Microsoft Visual Studio Community 2022*](https://visualstudio.microsoft.com/vs/community/).
-* *DOOM Retro* now uses [*SDL v2.30.7*](https://github.com/libsdl-org/SDL/releases/tag/release-2.30.7).
+* *DOOM Retro* now uses [*SDL v2.30.8*](https://github.com/libsdl-org/SDL/releases/tag/release-2.30.8).
 * Several changes have been made to further improve the overall performance and stability of *DOOM Retro*.
 * Minor changes have been made to text that is output to the console.
 * Minor improvements have been made to text autocompleted in the console by pressing the <kbd><b>TAB</b></kbd> key.
@@ -16,8 +16,8 @@
 * The health of the player when they are dead if the `negativehealth` CVAR is `on` no longer affects voodoo dolls.
 * Extensive improvements have been made to the support of [*Legacy Of Rust*](https://doomwiki.org/wiki/Legacy_of_Rust):
   * Partial support has been introduced for the new [*ID24* specification](https://doomwiki.org/wiki/ID24) so that:
-    * The sky in some maps now animate.
-    * An animated intermission screen is now displayed.
+    * The sky in some maps now animates.
+    * An animated intermission screen is now displayed when finishing a map.
   * Stats for killing banshees, ghouls, mindweavers, shocktroopers, tyrants and vassagos, for picking up fuel, and for firing the incinerator and calamity blade, are now all displayed by the `playerstats` CCMD.
   * A fuel can icon now appears in the widescreen HUD when the player has an incinerator or calamity blade equipped.
   * Fire from the player’s incinerator and calamity blade is now randomly mirrored and translucent.
@@ -50,6 +50,12 @@
 * The `vid_widescreen` CVAR no longer resets to `off` at startup if `-nosplash` is used on the command-line.
 * A bug is fixed whereby the z-coordinates of things bobbing in liquid sectors were altered upon loading a savegame when the `r_liquid_bob` CVAR was `on`.
 * Very short sprites are no longer clipped in liquid sectors when the `r_liquid_clipsprites` CVAR is `on`.
+* Aspect ratio correction is now applied to the automap. This feature can be toggled off using the new `am_correctaspectratio` CVAR, which is `on` by default and `off` when vanilla mode is enabled.
+* The automap now displays correctly when zooming out in very large maps.
+* The fuzz effect from spectres and the partial invisibility power-up now:
+  * Doesn't cause the status bar to bleed into the player's view when the console is open.
+  * Freezes along with everything else when freeze mode is enabled.
+* Pressing the <kbd><b>PRINTSCREEN</b></kbd> key no longer accelerates the finale.
 
 ![](https://github.com/bradharding/www.doomretro.com/raw/master/wiki/bigdivider.png)
 

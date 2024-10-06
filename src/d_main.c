@@ -1129,7 +1129,6 @@ static void D_AutoloadSIGIL2WAD(void)
         if (W_MergeFile(path, true))
             sigil = true;
     }
-
 }
 
 static void D_AutoloadNerveWAD(void)
@@ -1138,7 +1137,7 @@ static void D_AutoloadNerveWAD(void)
 
     D_AutoloadExtrasWAD();
 
-    if (BTSX || M_CheckParm("-noautoload"))
+    if (M_CheckParm("-noautoload"))
         return;
 
     M_snprintf(path, sizeof(path), "%s" DIR_SEPARATOR_S "%s", wadfolder, "NERVE.WAD");
@@ -2227,8 +2226,8 @@ static void D_DoomMainSetup(void)
     {
         C_Output("This is the first time " ITALICS(DOOMRETRO_NAME) " has been run on this " DEVICE ".");
 
-        stat_firstrun = (uint64_t)gamestarttime.tm_mday + (gamestarttime.tm_mon + 1) * 100
-            + (1900 + gamestarttime.tm_year) * 10000;
+        stat_firstrun = (uint64_t)gamestarttime.tm_mday + ((uint64_t)gamestarttime.tm_mon + 1) * 100
+            + ((uint64_t)gamestarttime.tm_year + 1900) * 10000;
     }
     else
     {

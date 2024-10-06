@@ -1055,48 +1055,26 @@ void R_DrawFuzzColumn(void)
 
     dest = ylookup0[dc_yl] + dc_x;
 
-    if (consoleactive)
-    {
-        // top
-        BIGFUZZYPIXEL((dc_yl >= 2 ? 8 : 6), fuzztable[fuzzpos++]);
-        dest += SCREENWIDTH * 2;
-
-        while (--count)
-        {
-            // middle
-            BIGFUZZYPIXEL(6, fuzztable[fuzzpos++]);
-            dest += SCREENWIDTH * 2;
-        }
-
-        // bottom
-        if (dc_yl & 1)
-            HALFBIGFUZZYPIXEL(5, fuzztable[fuzzpos++]);
-        else
-            BIGFUZZYPIXEL(5, fuzztable[fuzzpos++]);
-    }
+    // top
+    if (dc_yl >= 2)
+        BIGFUZZYPIXEL(8, (fuzztable[fuzzpos++] = FUZZ(-1, 1)));
     else
+        BIGFUZZYPIXEL(6, (fuzztable[fuzzpos++] = FUZZ(0, 1)));
+
+    dest += SCREENWIDTH * 2;
+
+    while (--count)
     {
-        // top
-        if (dc_yl >= 2)
-            BIGFUZZYPIXEL(8, (fuzztable[fuzzpos++] = FUZZ(-1, 1)));
-        else
-            BIGFUZZYPIXEL(6, (fuzztable[fuzzpos++] = FUZZ(0, 1)));
-
+        // middle
+        BIGFUZZYPIXEL(6, (fuzztable[fuzzpos++] = FUZZ(-1, 1)));
         dest += SCREENWIDTH * 2;
-
-        while (--count)
-        {
-            // middle
-            BIGFUZZYPIXEL(6, (fuzztable[fuzzpos++] = FUZZ(-1, 1)));
-            dest += SCREENWIDTH * 2;
-        }
-
-        // bottom
-        if (dc_yl & 1)
-            HALFBIGFUZZYPIXEL(5, (fuzztable[fuzzpos++] = FUZZ(-1, 0)));
-        else
-            BIGFUZZYPIXEL(5, (fuzztable[fuzzpos++] = FUZZ(-1, 0)));
     }
+
+    // bottom
+    if (dc_yl & 1)
+        HALFBIGFUZZYPIXEL(5, (fuzztable[fuzzpos++] = FUZZ(-1, 0)));
+    else
+        BIGFUZZYPIXEL(5, (fuzztable[fuzzpos++] = FUZZ(-1, 0)));
 }
 
 void R_DrawFuzzColumns(void)
@@ -1119,30 +1097,6 @@ void R_DrawFuzzColumns(void)
                     BIGFUZZYPIXEL(8, (fuzztable[fuzzpos++] = FUZZ(-1, 1)));
                 else
                     BIGFUZZYPIXEL(6, (fuzztable[fuzzpos++] = FUZZ(-1, 1)));
-            }
-        }
-}
-
-void R_DrawPausedFuzzColumns(void)
-{
-    const int   width = viewwindowx + viewwidth;
-    const int   height = (viewwindowy + viewheight) * SCREENWIDTH;
-
-    for (int y = viewwindowy * SCREENWIDTH; y < height; y += SCREENWIDTH * 2)
-        for (int x = viewwindowx + y; x < width + y; x += 2)
-        {
-            const byte  *source = screens[1] + x;
-
-            if (*source != NOFUZZ)
-            {
-                byte    *dest = screens[0] + x;
-
-                if (y == height - SCREENWIDTH * 2)
-                    BIGFUZZYPIXEL(5, fuzztable[fuzzpos++]);
-                else if (y >= SCREENWIDTH * 2 && *(source - SCREENWIDTH * 2) == NOFUZZ)
-                    BIGFUZZYPIXEL(8, fuzztable[fuzzpos++]);
-                else
-                    BIGFUZZYPIXEL(6, fuzztable[fuzzpos++]);
             }
         }
 }

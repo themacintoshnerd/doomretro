@@ -586,6 +586,8 @@ consolecmd_t consolecmds[] =
         "The color of lines in the automap indicating a change in a ceiling's height (" BOLD("0") " to " BOLD("255") ")."),
     CVAR_INT(am_corpsecolor, am_corpsecolour, "", int_cvars_func1, color_cvars_func2, CF_NONE, NOVALUEALIAS,
         "The color of corpses in the automap when you cheat (" BOLD("0") " to " BOLD("255") ")."),
+    CVAR_BOOL(am_correctaspectratio, "", "", bool_cvars_func1, bool_cvars_func2, CF_NONE, BOOLVALUEALIAS,
+        "Toggles aspect ratio correction in the automap."),
     CVAR_INT(am_crosshaircolor, am_crosshaircolour, "", int_cvars_func1, color_cvars_func2, CF_NONE, NOVALUEALIAS,
         "The color of the crosshair in the automap when follow mode is off (" BOLD("0") " to " BOLD("255") ")."),
     CVAR_INT(am_display, "", "", int_cvars_func1, am_display_func2, CF_NONE, NOVALUEALIAS,
@@ -689,10 +691,10 @@ consolecmd_t consolecmds[] =
     CCMD(fastmonsters, "", "", nightmare_func1, fastmonsters_func2, true, "[" BOLD("on") "|" BOLD("off") "]",
         "Toggles fast monsters."),
     CVAR_BOOL(flashkeys, "", "", bool_cvars_func1, bool_cvars_func2, CF_NONE, BOOLVALUEALIAS,
-        "Toggles flashing the required keycard or skull key when you try to open a locked door."),
+        "Toggles flashing the keycard or skull key that is needed when you try to open a locked door."),
     CVAR_BOOL(freelook, mouselook, "", bool_cvars_func1, freelook_func2, CF_NONE, BOOLVALUEALIAS,
         "Toggles freely looking up and down using the mouse or a controller."),
-    CCMD(freeze, "", "", game_ccmd_func1, freeze_func2, true, "[" BOLD("on") "|" BOLD("off") "]",
+    CCMD(freeze, "", "", alive_func1, freeze_func2, true, "[" BOLD("on") "|" BOLD("off") "]",
         "Toggles freeze mode."),
     CVAR_TIME(gametime, "", "", null_func1, time_cvars_func2,
         "The amount of time " ITALICS(DOOMRETRO_NAME) " has been running."),
@@ -2219,6 +2221,21 @@ static void cmdlist_func2(char *cmd, char *parms)
 //
 // condump CCMD
 //
+
+static int indentation(const char *string)
+{
+    const int   len = (int)strlen(string);
+    int         count = 0;
+
+    for (int i = 0; i < len; i++)
+        if (string[i] == ' ')
+            count++;
+        else
+            break;
+
+    return count;
+}
+
 static bool condump_func1(char *cmd, char *parms)
 {
     return (numconsolestrings > CONSOLEBLANKLINES);
@@ -2275,7 +2292,7 @@ static void condump_func2(char *cmd, char *parms)
                 if (type == warningstring || type == playerwarningstring)
                     fputs("! ", file);
 
-                for (int inpos = 0; inpos < len; inpos++)
+                for (int inpos = (indentation(string) - 1) / 2; inpos < len; inpos++)
                 {
                     const unsigned char letter = string[inpos];
 
@@ -3686,10 +3703,14 @@ static void kill_func2(char *cmd, char *parms)
                                     stat_monsterskilled_total = SafeAdd(stat_monsterskilled_total, 1);
                                     kills++;
                                 }
-                                else if ((flags & MF_SHOOTABLE) && type != MT_PLAYER && type != MT_BARREL && (type != MT_HEAD || !hacx))
+                                else if ((flags & MF_SHOOTABLE)
+                                    && type != MT_PLAYER && type != MT_BARREL
+                                    && (type != MT_LAMP || !legacyofrust)
+                                    && (type != MT_HEAD || !hacx))
                                 {
                                     thing->flags2 |= MF2_MASSACRE;
                                     massacre = true;
+
                                     P_DamageMobj(thing, viewplayer->mo, viewplayer->mo, thing->health, false, false);
                                     massacre = false;
                                     kills++;
@@ -4572,14 +4593,13 @@ static void map_func2(char *cmd, char *parms)
 
     if (gamemode == commercial)
     {
-        if (mapcmdmap >= 31 || (gamemission == pack_nerve && mapcmdmap == 9))
+        if (mapcmdmap == 31 || mapcmdmap == 32
+            || (mapcmdmap == 33 && bfgedition)
+            || (gamemission == pack_nerve && mapcmdmap == 9))
             message_secret = true;
     }
-    else
-    {
-        if (mapcmdmap == 9)
-            message_secret = true;
-    }
+    else if (mapcmdmap == 9)
+        message_secret = true;
 
     gameepisode = mapcmdepisode;
 
@@ -5043,7 +5063,7 @@ static void mapstats_func2(char *cmd, char *parms)
         lump = W_CheckNumForName(lumpname);
         wadtype = lumpinfo[lump]->wadfile->type;
     }
-    else if (BTSX || KDIKDIZD)
+    else if (BTSX || KDIKDIZD || legacyofrust)
     {
         char    lumpname[6];
 
@@ -5128,7 +5148,7 @@ static void mapstats_func2(char *cmd, char *parms)
         }
         else
         {
-            if (customepisode)
+            if (customepisodes)
             {
                 if (**episodes[maptoepisode[gamemap] - 1])
                 {
@@ -5151,7 +5171,7 @@ static void mapstats_func2(char *cmd, char *parms)
     }
     else
     {
-        if (customepisode)
+        if (customepisodes)
         {
             if (**episodes[maptoepisode[gamemap] - 1])
             {
@@ -6440,7 +6460,7 @@ static void C_PlayerStats_Game(void)
     free(temp2);
     free(temp3);
 
-    temp1 = commify(viewplayer->itemspickedup_ammo_bullets
+    temp1 = commify((int64_t)viewplayer->itemspickedup_ammo_bullets
         + viewplayer->itemspickedup_ammo_shells
         + viewplayer->itemspickedup_ammo_rockets
         + (legacyofrust ? viewplayer->itemspickedup_ammo_fuel : viewplayer->itemspickedup_ammo_cells));
@@ -8241,11 +8261,10 @@ static void spawn_func2(char *cmd, char *parms)
     {
         bool                spawn = true;
         const mobjtype_t    type = P_FindDoomedNum(spawncmdtype);
+        char                buffer[128];
 
         if (gamemode != commercial)
         {
-            char    buffer[128];
-
             if (spawncmdtype >= ArchVile && spawncmdtype <= MonsterSpawner && !REKKR)
             {
                 M_StringCopy(buffer, mobjinfo[type].plural1, sizeof(buffer));
@@ -8253,6 +8272,7 @@ static void spawn_func2(char *cmd, char *parms)
                 if (!*buffer)
                     M_snprintf(buffer, sizeof(buffer), "%ss", mobjinfo[type].name1);
 
+                buffer[0] = toupper(buffer[0]);
                 C_Warning(0, "%s can't be spawned in " ITALICS("%s") ".", buffer, gamedescription);
                 spawn = false;
             }
@@ -8272,6 +8292,7 @@ static void spawn_func2(char *cmd, char *parms)
                 if (!*buffer)
                     M_snprintf(buffer, sizeof(buffer), "%ss", mobjinfo[type].name1);
 
+                buffer[0] = toupper(buffer[0]);
                 C_Warning(0, "%s can't be spawned in the shareware version of " ITALICS("DOOM") ". "
                     "You can buy the full version on " ITALICS("Steam") ", etc.", buffer);
                 spawn = false;
@@ -8279,12 +8300,15 @@ static void spawn_func2(char *cmd, char *parms)
         }
         else if (spawncmdtype == WolfensteinSS && !allowwolfensteinss)
         {
+            M_snprintf(buffer, sizeof(buffer), "%ss", mobjinfo[type].name1);
+            buffer[0] = toupper(buffer[0]);
+
             if (bfgedition)
-                C_Warning(0, "%s%s can't be spawned in " ITALICS("%s (BFG Edition)") ".",
-                    (spawncmdfriendly ? "Friendly " : ""), mobjinfo[type].name1, gamedescription);
+                C_Warning(0, "%s can't be spawned in " ITALICS("%s (BFG Edition)") ".",
+                    buffer, gamedescription);
             else
-                C_Warning(0, "%s%s can't be spawned in " ITALICS("%s") ".",
-                    (spawncmdfriendly ? "Friendly " : ""), mobjinfo[type].name1, gamedescription);
+                C_Warning(0, "%s can't be spawned in " ITALICS("%s") ".",
+                    buffer, gamedescription);
 
             spawn = false;
         }
@@ -11699,7 +11723,7 @@ static void vid_showfps_func2(char *cmd, char *parms)
         else
         {
             framespersecond = 0;
-            frames = -1;
+            framecount = -1;
         }
     }
 }

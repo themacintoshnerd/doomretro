@@ -1709,13 +1709,12 @@ void C_Drawer(void)
                 do
                 {
                     char    *temp = M_SubString(console[i].string, 0, wrap);
-                    int     width;
+                    int     width = indent;
 
-                    if (stringtype == warningstring || stringtype == playerwarningstring)
-                        width = indent + C_TextWidth(temp, true, true);
+                    if (stringtype == warningstring || stringtype == playerwarningstring || !indent)
+                        width += C_TextWidth(temp, true, true);
                     else
-                        width = (indent ? indent + C_TextWidth(strrchr(temp, '\t') + 1, true, true) :
-                            C_TextWidth(temp, true, true));
+                        width += C_TextWidth(strrchr(temp, '\t') + 1, true, true);
 
                     free(temp);
 
@@ -1819,38 +1818,40 @@ void C_Drawer(void)
 
             if (wrap < len && i < bottomline)
             {
-                char    *temp = M_SubString(console[i].string, wrap, (size_t)len - wrap);
+                char    *temp1 = M_SubString(console[i].string, wrap, (size_t)len - wrap);
+                char    *temp2 = M_StringDuplicate(trimwhitespace(temp1));
                 bool    bold = false;
                 bool    italics = false;
 
-                for (int j = 1; j < (int)strlen(temp); j++)
-                    if (temp[j] == BOLDONCHAR)
+                for (int j = 1; j < (int)strlen(temp2); j++)
+                    if (temp2[j] == BOLDONCHAR)
                         break;
-                    else if (temp[j] == BOLDOFFCHAR)
+                    else if (temp2[j] == BOLDOFFCHAR)
                     {
                         bold = true;
                         break;
                     }
 
                 if (bold)
-                    temp = M_StringJoin(BOLDON, temp, NULL);
+                    temp2 = M_StringJoin(BOLDON, temp2, NULL);
 
-                for (int j = 1; j < (int)strlen(temp); j++)
-                    if (temp[j] == ITALICSONCHAR)
+                for (int j = 1; j < (int)strlen(temp2); j++)
+                    if (temp2[j] == ITALICSONCHAR)
                         break;
-                    else if (temp[j] == ITALICSOFFCHAR)
+                    else if (temp2[j] == ITALICSOFFCHAR)
                     {
                         italics = true;
                         break;
                     }
 
                 if (italics)
-                    temp = M_StringJoin(ITALICSON, temp, NULL);
+                    temp2 = M_StringJoin(ITALICSON, temp2, NULL);
 
-                C_DrawConsoleText(CONSOLETEXTX + console[i].indent, y + CONSOLELINEHEIGHT,
-                    trimwhitespace(temp), consolecolors[stringtype], NOBACKGROUNDCOLOR,
-                    consoleboldcolors[stringtype], tinttab66, notabs, true, true, true, 0, '\0', '\0');
-                free(temp);
+                C_DrawConsoleText(CONSOLETEXTX + console[i].indent, y + CONSOLELINEHEIGHT, temp2,
+                    consolecolors[stringtype], NOBACKGROUNDCOLOR, consoleboldcolors[stringtype],
+                    tinttab66, notabs, true, true, true, 0, '\0', '\0');
+                free(temp1);
+                free(temp2);
             }
 
             free(text);

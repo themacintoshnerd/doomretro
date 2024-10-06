@@ -290,7 +290,6 @@ static void I_SetPriority(bool active)
 
         SDL_SetThreadPriority(SDL_THREAD_PRIORITY_NORMAL);
     }
-
 }
 
 bool    altdown = false;
@@ -713,18 +712,18 @@ static void nullfunc(void) {}
 uint64_t    performancecounter;
 uint64_t    performancefrequency;
 uint64_t    starttime;
-int         frames = -1;
+int         framecount = -1;
 
 static void CalculateFPS(void)
 {
     const uint64_t  currenttime = SDL_GetPerformanceCounter();
 
-    frames++;
+    framecount++;
 
     if (starttime < currenttime - performancefrequency)
     {
-        framespersecond = frames;
-        frames = 0;
+        framespersecond = framecount;
+        framecount = 0;
         starttime = currenttime;
     }
 }

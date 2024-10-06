@@ -624,7 +624,7 @@ void S_ChangeMusic(const musicnum_t musicnum, const bool looping,
         M_StringCopy(namebuf, music->name1, sizeof(namebuf));
     else
     {
-        if (*music->IDKFA)
+        if (*music->IDKFA && !legacyofrust)
         {
             M_StringCopy(namebuf, music->IDKFA, sizeof(namebuf));
 
@@ -662,9 +662,6 @@ void S_ChangeMusic(const musicnum_t musicnum, const bool looping,
     {
         music->lumpnum = mapinfomusic;
         M_StringCopy(music->name1, lumpinfo[mapinfomusic]->name, sizeof(music->name1));
-
-        if (legacyofrust && extras)
-            music->name1[0] = 'O';
     }
     else if (!music->lumpnum)
         music->lumpnum = W_CheckNumForName(namebuf);

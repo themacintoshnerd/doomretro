@@ -1376,12 +1376,7 @@ static void HU_DrawAltHUD(void)
             althudfunc(ALTHUD_RIGHT_X, ALTHUD_Y + 13, altrightpatch, WHITE, color, tinttab60, shadowcolor);
 
         if ((patch = weaponinfo[weapon].weaponpatch))
-        {
-            if (inverted)
-                althudweaponfunc(ALTHUD_RIGHT_X + 108, weaponinfo[weapon].weapony, patch, color, black75, shadowcolor);
-            else
-                althudweaponfunc(ALTHUD_RIGHT_X + 108, weaponinfo[weapon].weapony, patch, color, white75, shadowcolor);
-        }
+            althudweaponfunc(ALTHUD_RIGHT_X + 108, weaponinfo[weapon].weapony, patch, color, tinttab60, shadowcolor);
 
         for (int i = 1; i <= NUMCARDS; i++)
             for (int j = 0; j < NUMCARDS; j++)
@@ -1626,7 +1621,8 @@ void HU_Ticker(void)
     }
 
     // display message if necessary
-    else if (viewplayer->message && (!message_nottobefuckedwith || message_dontfuckwithme))
+    else if (viewplayer->message && (!message_nottobefuckedwith || message_dontfuckwithme)
+        && (r_hud || r_screensize < r_screensize_max))
     {
         if (messages || message_dontfuckwithme || message_secret || message_warning)
         {

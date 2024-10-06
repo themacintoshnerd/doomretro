@@ -1175,14 +1175,13 @@ void V_DrawAltHUDWeaponPatch(int x, int y, patch_t *patch, int color, const byte
         // step through the posts in a column
         while (column->topdelta != 0xFF)
         {
-            byte        *source = (byte *)column + 3;
             byte        *dest = &desttop[column->topdelta * SCREENWIDTH];
             const byte  length = column->length;
             byte        count = length;
 
             while (count-- > 0)
             {
-                *dest = tinttab[grays[*source++]];
+                *dest = color;
                 dest += SCREENWIDTH;
 
                 if (++yy == SCREENHEIGHT)
@@ -1211,16 +1210,13 @@ void V_DrawTranslucentAltHUDWeaponPatch(int x, int y, patch_t *patch, int color,
         // step through the posts in a column
         while (column->topdelta != 0xFF)
         {
-            byte        *source = (byte *)column + 3;
             byte        *dest = &desttop[column->topdelta * SCREENWIDTH];
             const byte  length = column->length;
             byte        count = length;
 
             while (count-- > 0)
             {
-                const byte  dot = *source++;
-
-                *dest = tinttab75[(tinttab[grays[dot]] << 8) + *dest];
+                *dest = tinttab[(color << 8) + *dest];
                 dest += SCREENWIDTH;
 
                 if (++yy == SCREENHEIGHT - 1)

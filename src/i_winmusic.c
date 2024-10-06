@@ -325,7 +325,7 @@ bool I_Windows_InitMusic(void)
     MMRESULT    mmr;
 
     if ((mmr = midiStreamOpen(&hMidiStream, &MidiDevice, (DWORD)1, (DWORD_PTR)&MidiStreamProc,
-        (DWORD_PTR)NULL, CALLBACK_FUNCTION)) != MMSYSERR_NOERROR)
+        (DWORD_PTR)0, CALLBACK_FUNCTION)) != MMSYSERR_NOERROR)
     {
         MidiErrorMessage(mmr);
         return false;
@@ -490,10 +490,20 @@ void I_Windows_UnregisterSong(void)
 
 void I_Windows_ShutdownMusic(void)
 {
+#if !defined(__SANITIZE_ADDRESS__)
+    MMRESULT    mmr;
+#endif
+
     I_Windows_StopSong();
     I_Windows_UnregisterSong();
 
-    //midiOutUnprepareHeader((HMIDIOUT)hMidiStream, &buffer.MidiStreamHdr, sizeof(MIDIHDR));
+#if !defined(__SANITIZE_ADDRESS__)
+    if ((mmr = midiOutUnprepareHeader((HMIDIOUT)hMidiStream, &buffer.MidiStreamHdr, sizeof(MIDIHDR))) != MMSYSERR_NOERROR)
+    {
+        MidiErrorMessage(mmr);
+        return;
+    }
+#endif
 
     midiStreamClose(hMidiStream);
 

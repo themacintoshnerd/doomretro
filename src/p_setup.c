@@ -143,6 +143,7 @@ typedef struct
     char            intertext[1024];
     char            intertextsecret[1024];
     int             liquid[NUMLIQUIDS];
+    int             mapinepisode;
     int             music;
     char            musicartist[128];
     char            musictitle[128];
@@ -1949,6 +1950,7 @@ static void P_LoadThings(int map, int lump)
             if (!*buffer)
                 M_snprintf(buffer, sizeof(buffer), "%ss", mobjinfo[doomednum].name1);
 
+            buffer[0] = toupper(buffer[0]);
             C_Warning(2, "%s can't be spawned in " ITALICS("%s."), buffer, gamedescription);
 
             continue;
@@ -2025,6 +2027,7 @@ static void P_LoadThings(int map, int lump)
 
     M_Seed((unsigned int)time(NULL));
     M_BigSeed((unsigned int)time(NULL));
+    M_FuzzSeed((unsigned int)time(NULL));
     W_ReleaseLumpNum(lump);
 }
 
@@ -2804,8 +2807,10 @@ static void P_RemoveSlimeTrails(void)                   // killough 10/98
                         const int64_t   dy2 = (int64_t)(l->dy >> FRACBITS) * (l->dy >> FRACBITS);
                         const int64_t   dxy = (int64_t)(l->dx >> FRACBITS) * (l->dy >> FRACBITS);
                         const int64_t   s = dx2 + dy2;
-                        const int       x0 = v->x, y0 = v->y;
-                        const int       x1 = l->v1->x, y1 = l->v1->y;
+                        const fixed_t   x0 = v->x;
+                        const fixed_t   y0 = v->y;
+                        const fixed_t   x1 = l->v1->x;
+                        const fixed_t   y1 = l->v1->y;
 
                         v->x = (fixed_t)((dx2 * x0 + dy2 * x1 + dxy * ((int64_t)y0 - y1)) / s);
                         v->y = (fixed_t)((dy2 * y0 + dx2 * y1 + dxy * ((int64_t)x0 - x1)) / s);
@@ -2924,7 +2929,10 @@ void P_MapName(int ep, int map)
             break;
 
         case doom2:
-            M_snprintf(mapnum, sizeof(mapnum), "MAP%02i", map);
+            if (legacyofrust)
+                M_snprintf(mapnum, sizeof(mapnum), "E%iM%i", maptoepisode[map], P_GetMapInEpisode(map));
+            else
+                M_snprintf(mapnum, sizeof(mapnum), "MAP%02i", map);
 
             if (*mapinfoname && !BTSX)
                 M_StringCopy(maptitle, mapinfoname, sizeof(maptitle));
@@ -3134,7 +3142,7 @@ void P_SetupLevel(int ep, int map)
     totalitems = 0;
     totalsecrets = 0;
     totalpickups = 0;
-    memset(monstercount, 0, nummobjtypes * sizeof(int));
+    memset(monstercount, 0, NUMMOBJTYPES * sizeof(int));
     barrelcount = 0;
     player1starts = 0;
     wminfo.partime = 0;
@@ -3170,7 +3178,7 @@ void P_SetupLevel(int ep, int map)
         {
             M_snprintf(lumpname, sizeof(lumpname), "MAP%02i", map);
 
-            if (map >= 31 || (gamemission == pack_nerve && map == 9))
+            if (map == 31 || map == 32 || (map == 33 && bfgedition) || (gamemission == pack_nerve && map == 9))
                 secretmap = true;
         }
         else
@@ -3197,7 +3205,12 @@ void P_SetupLevel(int ep, int map)
         && ((numconsolestrings == 1
             || (!M_StringStartsWith(console[numconsolestrings - 2].string, "map ")
                 && !autostart))))
-        C_Input("map %s", lumpname);
+    {
+        if (legacyofrust)
+            C_Input("map E%iM%i", maptoepisode[map], P_GetMapInEpisode(map));
+        else
+            C_Input("map %s", lumpname);
+    }
 
     if (!(samelevel = (lumpnum == prevlumpnum)))
     {
@@ -3432,6 +3445,18 @@ static void P_ParseMapString(const char *string, int *map, int *ep)
     }
 
     free(buffer);
+}
+
+static int mapinepisode(const int map)
+{
+    int epi = maptoepisode[map];
+
+    if (epi)
+        for (int i = map; i >= 1; i--)
+            if (maptoepisode[i] < epi)
+                return (map - i);
+
+    return map;
 }
 
 static bool P_ParseMapInfo(const char *scriptname)
@@ -3901,7 +3926,12 @@ static bool P_ParseMapInfo(const char *scriptname)
                             SC_MustGetString();
 
                             if (legacyofrust && extras)
+                            {
                                 sc_String[0] = 'O';
+
+                                if (W_CheckNumForName(sc_String) == -1)
+                                    sc_String[0] = 'D';
+                            }
 
                             info->music = W_CheckNumForName(sc_String);
                             break;
@@ -4135,11 +4165,17 @@ static bool P_ParseMapInfo(const char *scriptname)
 
     SC_Close();
 
-    if (customepisode && EpiDef.laston >= EpiDef.numitems)
+    if (customepisodes)
     {
-        EpiDef.laston = 0;
-        episode = 1;
-        M_SaveCVARs();
+        for (int i = 0; i < 100; i++)
+            mapinfo[1][i].mapinepisode = mapinepisode(i);
+
+        if (EpiDef.laston >= EpiDef.numitems)
+        {
+            EpiDef.laston = 0;
+            episode = 1;
+            M_SaveCVARs();
+        }
     }
 
     temp1 = commify(sc_Line);
@@ -4309,14 +4345,7 @@ bool P_IsSecret(const int ep, const int map)
 
 int P_GetMapInEpisode(const int map)
 {
-    int epi = maptoepisode[map];
-
-    if (epi)
-        for (int i = map; i >= 1; i--)
-            if (maptoepisode[i] < epi)
-                return (map - i);
-
-    return map;
+    return mapinfo[1][map].mapinepisode;
 }
 
 //

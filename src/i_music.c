@@ -100,7 +100,7 @@ bool I_InitMusic(void)
     music_initialized = true;
 
 #if defined(_WIN32)
-    if (extras && W_GetNumForName("H_INTRO") >= 0 && (!sigil || buckethead) && (!sigil2 || thorr))
+    if (extras && W_GetNumForName("H_INTRO") >= 0 && (!sigil || buckethead) && (!sigil2 || thorr) && !legacyofrust)
         return true;
 
     if (!(windowsmidi = I_Windows_InitMusic()))
@@ -153,17 +153,20 @@ void I_PauseSong(void)
     if (!music_initialized)
         return;
 
+#if defined(_WIN32)
+    if (midimusictype && windowsmidi)
+        I_Windows_PauseSong();
+    else
+        Mix_PauseMusic();
+#else
     if (midimusictype)
     {
-#if defined(_WIN32)
-        I_Windows_PauseSong();
-#else
         paused_midi_volume = current_music_volume;
         Mix_VolumeMusic(0);
-#endif
     }
     else
         Mix_PauseMusic();
+#endif
 }
 
 void I_ResumeSong(void)
@@ -172,7 +175,7 @@ void I_ResumeSong(void)
         return;
 
 #if defined(_WIN32)
-    if (midimusictype)
+    if (midimusictype && windowsmidi)
         I_Windows_ResumeSong();
     else
         Mix_ResumeMusic();
