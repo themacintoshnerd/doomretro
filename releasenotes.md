@@ -2,7 +2,7 @@
 
 ### DOOM Retro v5.6
 
-* *DOOM Retro* is now built using v17.11.4 of [*Microsoft Visual Studio Community 2022*](https://visualstudio.microsoft.com/vs/community/).
+* *DOOM Retro* is now built using v17.11.5 of [*Microsoft Visual Studio Community 2022*](https://visualstudio.microsoft.com/vs/community/).
 * *DOOM Retro* now uses [*SDL v2.30.8*](https://github.com/libsdl-org/SDL/releases/tag/release-2.30.8).
 * Several changes have been made to further improve the overall performance and stability of *DOOM Retro*.
 * Minor changes have been made to text that is output to the console.
@@ -55,7 +55,7 @@
 * The fuzz effect from spectres and the partial invisibility power-up now:
   * Doesn't cause the status bar to bleed into the player's view when the console is open.
   * Freezes along with everything else when freeze mode is enabled.
-* Pressing the <kbd><b>PRINTSCREEN</b></kbd> key no longer accelerates the finale.
+* Pressing the <kbd><b>PRINTSCREEN</b></kbd> key no longer advances the finale.
 
 ![](https://github.com/bradharding/www.doomretro.com/raw/master/wiki/bigdivider.png)
 
