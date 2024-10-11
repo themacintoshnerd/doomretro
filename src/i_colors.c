@@ -33,9 +33,6 @@
 ==============================================================================
 */
 
-#include <stdlib.h>
-
-#include "doomstat.h"
 #include "i_colors.h"
 #include "i_swap.h"
 #include "w_wad.h"

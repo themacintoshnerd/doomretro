@@ -35,13 +35,12 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>
 
 #include "m_misc.h"
 #include "md5.h"
 
 #ifdef WORDS_BIGENDIAN
-void byteswap(uint32_t *buf, unsigned int words)
+static void byteswap(uint32_t *buf, unsigned int words)
 {
     byte    *p = (byte *)buf;
 

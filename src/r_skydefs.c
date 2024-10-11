@@ -36,9 +36,7 @@
 #include "c_console.h"
 #include "cJSON/cJSON.h"
 #include "m_array.h"
-#include "r_defs.h"
 #include "r_skydefs.h"
-#include "r_state.h"
 #include "w_wad.h"
 
 static bool ParseFire(cJSON *json, fire_t *out)
@@ -180,6 +178,5 @@ skydefs_t *R_ParseSkyDefs(void)
     }
 
     cJSON_Delete(json);
-    id24compatible = true;
     return out;
 }

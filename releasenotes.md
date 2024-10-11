@@ -32,7 +32,9 @@
   * The order in which multiple `MAPINFO` lumps are loaded is now correct.
   * `EPISODE` is now parsed in more instances.
   * Up to 10 episodes can now be specified using `EPISODE` and will display correctly in the episode menu.
-* If the fists or chainsaw are replaced with a weapon as specified in a `DEHACKED` lump, that weapon can now consume ammo.
+* These changes have been made to the support of `DEHACKED` lumps:
+  * A bug is fixed whereby a line wouldn’t be parsed if following a blank line in some instances.
+  * If the fists or chainsaw are replaced using `WEAPON`, that weapon can now consume ammo.
 * The [fake contrast](https://doomwiki.org/wiki/Fake_contrast) applied to wall textures is now smoother.
 * A bug is fixed whereby the player’s aim was slightly lower when the `freelook` CVAR was `on` and the `r_screensize` CVAR was `8`.
 * These changes have been made to the alternate widescreen HUD:
@@ -42,18 +44,23 @@
   * The health bar no longer flashes white while it is red and the player picks up some health.
 * The mouse wheel can no longer be used to advance *DOOM II’s* cast sequence.
 * The amount of ammo the player has is no longer momentarily translucent in the widescreen HUD at the start of each map if the `animatedstats` CVAR is `on`.
-* A bug is fixed whereby the help screen wouldn’t be fully displayed when the `vid_widescreen` CVAR was `off`.
-* The `TITLEPIC` lump is now always used as the help screen’s background when not playing a game.
+* These changes have been made to the help screen:
+  * A bug is fixed whereby the help screen wouldn’t be fully displayed when the `vid_widescreen` CVAR was `off`.
+  * The `TITLEPIC` lump is now always used as the help screen’s background when not playing a game.
+  * The help screen now displays better in some PWADs that have custom `PLAYPAL` lumps.
 * Using the mouse pointer to move the scroll bar in the console is now more responsive when the `m_pointer` CVAR is `on`.
 * Drop shadows are now always displayed correctly for all elements on the intermission screen.
 * A bug is fixed whereby the wrong `INTERPIC` lump would be displayed in some instances.
 * The `vid_widescreen` CVAR no longer resets to `off` at startup if `-nosplash` is used on the command-line.
 * A bug is fixed whereby the z-coordinates of things bobbing in liquid sectors were altered upon loading a savegame when the `r_liquid_bob` CVAR was `on`.
 * Very short sprites are no longer clipped in liquid sectors when the `r_liquid_clipsprites` CVAR is `on`.
-* Aspect ratio correction is now applied to the automap. This feature can be toggled off using the new `am_correctaspectratio` CVAR, which is `on` by default and `off` when vanilla mode is enabled.
-* The automap now displays correctly when zooming out in very large maps.
+* These changes have been made to the automap:
+  * Aspect ratio correction is now applied. This feature can be toggled off using the new `am_correctaspectratio` CVAR, which is `on` by default and `off` when vanilla mode is enabled.
+  * In the original *DOOM*, if the player moved around while the automap was open, walls seen by the player for the first time weren’t mapped. This behavior can now be restored by disabling the new `am_dynamic` CVAR, which is `on` by default and `off` when vanilla mode is enabled.
+  * The automap now displays correctly when zooming out in very large maps.
+  * The grid now always covers the entire screen when the `am_rotatemode` CVAR is `on`.
 * The fuzz effect from spectres and the partial invisibility power-up now:
-  * Doesn't cause the status bar to bleed into the player's view when the console is open.
+  * Doesn't cause the status bar to bleed into the player's view while the console is open.
   * Freezes along with everything else when freeze mode is enabled.
 * Pressing the <kbd><b>PRINTSCREEN</b></kbd> key no longer advances the finale.
 

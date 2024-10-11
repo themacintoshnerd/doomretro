@@ -37,8 +37,6 @@
 #pragma warning( disable : 4091 )
 
 #include <Windows.h>
-#include <io.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #if defined(_MSC_VER)
@@ -60,7 +58,6 @@
 #include "i_system.h"
 #include "m_config.h"
 #include "m_misc.h"
-#include "version.h"
 #include "w_file.h"
 
 #if defined(__APPLE__)
@@ -123,7 +120,7 @@ bool M_FileExists(const char *filename)
 }
 
 #if !defined(_WIN32) && !defined(__APPLE__)
-bool file_exists_get_path(const char *basedir, const char *filename, char **retpath)
+static bool file_exists_get_path(const char *basedir, const char *filename, char **retpath)
 {
     *retpath = M_StringJoin(basedir, DIR_SEPARATOR_S, filename, NULL);
 
