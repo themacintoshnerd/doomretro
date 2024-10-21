@@ -121,8 +121,6 @@ static byte *am_crosshaircolor2;
 #define CXMTOF(x)               MTOF((x) - m_x)
 #define CYMTOF(y)               (MAPHEIGHT - MTOF((y) - m_y))
 
-#define AM_CORRECTASPECTRATIO   (5 * FRACUNIT / 6)
-
 typedef struct
 {
     mpoint_t    a;
@@ -1154,8 +1152,7 @@ static void AM_RotatePoint(mpoint_t *point)
 
 static void AM_CorrectAspectRatio(mpoint_t *point)
 {
-    if (am_correctaspectratio)
-        point->y = am_frame.center.y + FixedMul(point->y - am_frame.center.y, AM_CORRECTASPECTRATIO);
+    point->y = am_frame.center.y + 5 * (point->y - am_frame.center.y) / 6;
 }
 
 //
@@ -1424,21 +1421,6 @@ static void AM_DrawFline(int x0, int y0, int x1, int y1, const byte *color,
     }
 }
 
-static mline_t (*rotatelinefunc)(mline_t);
-
-static mline_t AM_RotateLine(mline_t mline)
-{
-    AM_RotatePoint(&mline.a);
-    AM_RotatePoint(&mline.b);
-
-    return mline;
-}
-
-static mline_t AM_DoNotRotateLine(mline_t mline)
-{
-    return mline;
-}
-
 //
 // Draws flat (floor/ceiling tile) aligned grid lines.
 //
@@ -1463,9 +1445,18 @@ static void AM_DrawGrid(void)
     {
         mline_t mline = { { x, starty }, { x, endy } };
 
-        mline = rotatelinefunc(mline);
-        AM_CorrectAspectRatio(&mline.a);
-        AM_CorrectAspectRatio(&mline.b);
+        if (am_rotatemode)
+        {
+            AM_RotatePoint(&mline.a);
+            AM_RotatePoint(&mline.b);
+        }
+
+        if (am_correctaspectratio)
+        {
+            AM_CorrectAspectRatio(&mline.a);
+            AM_CorrectAspectRatio(&mline.b);
+        }
+
         AM_DrawFline(mline.a.x, mline.a.y, mline.b.x, mline.b.y, &gridcolor, putbigdot2);
     }
 
@@ -1474,9 +1465,18 @@ static void AM_DrawGrid(void)
     {
         mline_t mline = { { startx, y }, { endx, y } };
 
-        mline = rotatelinefunc(mline);
-        AM_CorrectAspectRatio(&mline.a);
-        AM_CorrectAspectRatio(&mline.b);
+        if (am_rotatemode)
+        {
+            AM_RotatePoint(&mline.a);
+            AM_RotatePoint(&mline.b);
+        }
+
+        if (am_correctaspectratio)
+        {
+            AM_CorrectAspectRatio(&mline.a);
+            AM_CorrectAspectRatio(&mline.b);
+        }
+
         AM_DrawFline(mline.a.x, mline.a.y, mline.b.x, mline.b.y, &gridcolor, putbigdot2);
     }
 }
@@ -1542,9 +1542,17 @@ static void AM_DrawWalls(void)
                 const unsigned short    special = line.special;
                 byte                    *doorcolor;
 
-                mline = rotatelinefunc(mline);
-                AM_CorrectAspectRatio(&mline.a);
-                AM_CorrectAspectRatio(&mline.b);
+                if (am_rotatemode)
+                {
+                    AM_RotatePoint(&mline.a);
+                    AM_RotatePoint(&mline.b);
+                }
+
+                if (am_correctaspectratio)
+                {
+                    AM_CorrectAspectRatio(&mline.a);
+                    AM_CorrectAspectRatio(&mline.b);
+                }
 
                 if (special && (doorcolor = AM_DoorColor(special)) != cdwallcolor)
                     AM_DrawFline(mline.a.x, mline.a.y, mline.b.x, mline.b.y, doorcolor, putbigdot);
@@ -1594,9 +1602,17 @@ static void AM_DrawWalls_AllMap(void)
                 const unsigned short    special = line.special;
                 byte                    *doorcolor;
 
-                mline = rotatelinefunc(mline);
-                AM_CorrectAspectRatio(&mline.a);
-                AM_CorrectAspectRatio(&mline.b);
+                if (am_rotatemode)
+                {
+                    AM_RotatePoint(&mline.a);
+                    AM_RotatePoint(&mline.b);
+                }
+
+                if (am_correctaspectratio)
+                {
+                    AM_CorrectAspectRatio(&mline.a);
+                    AM_CorrectAspectRatio(&mline.b);
+                }
 
                 if (special && (doorcolor = AM_DoorColor(special)) != cdwallcolor)
                     AM_DrawFline(mline.a.x, mline.a.y, mline.b.x, mline.b.y, doorcolor, putbigdot);
@@ -1645,9 +1661,17 @@ static void AM_DrawWalls_Cheating(void)
             const unsigned short    special = line.special;
             byte                    *doorcolor;
 
-            mline = rotatelinefunc(mline);
-            AM_CorrectAspectRatio(&mline.a);
-            AM_CorrectAspectRatio(&mline.b);
+            if (am_rotatemode)
+            {
+                AM_RotatePoint(&mline.a);
+                AM_RotatePoint(&mline.b);
+            }
+
+            if (am_correctaspectratio)
+            {
+                AM_CorrectAspectRatio(&mline.a);
+                AM_CorrectAspectRatio(&mline.b);
+            }
 
             if (special && (doorcolor = AM_DoorColor(special)) != cdwallcolor)
                 AM_DrawFline(mline.a.x, mline.a.y, mline.b.x, mline.b.y, doorcolor, putbigdot);
@@ -1676,7 +1700,7 @@ static void AM_DrawWalls_Cheating(void)
 }
 
 static void AM_DrawPlayerArrow(const mline_t *lineguy, const int lineguylines,
-    const angle_t angle, const fixed_t x, const fixed_t y)
+    const angle_t angle, const fixed_t x, const fixed_t y, void (*putdot)(int, int, const byte *))
 {
     for (int i = 0; i < lineguylines; i++)
     {
@@ -1689,25 +1713,13 @@ static void AM_DrawPlayerArrow(const mline_t *lineguy, const int lineguylines,
         AM_Rotate(&x1, &y1, angle);
         AM_Rotate(&x2, &y2, angle);
 
-        AM_DrawFline(x + x1, y + y1, x + x2, y + y2, &playercolor, putbigdot2);
-    }
-}
+        if (am_correctaspectratio)
+        {
+            y1 = 5 * y1 / 6;
+            y2 = 5 * y2 / 6;
+        }
 
-static void AM_DrawTranslucentPlayerArrow(const mline_t *lineguy, const int lineguylines,
-    angle_t angle, const fixed_t x, const fixed_t y)
-{
-    for (int i = 0; i < lineguylines; i++)
-    {
-        const mline_t   line = lineguy[i];
-        int             x1 = line.a.x;
-        int             y1 = line.a.y;
-        int             x2 = line.b.x;
-        int             y2 = line.b.y;
-
-        AM_Rotate(&x1, &y1, angle);
-        AM_Rotate(&x2, &y2, angle);
-
-        AM_DrawFline(x + x1, y + y1, x + x2, y + y2, &playercolor, &PUTTRANSLUCENTDOT);
+        AM_DrawFline(x + x1, y + y1, x + x2, y + y2, &playercolor, putdot);
     }
 }
 
@@ -1724,6 +1736,12 @@ static void AM_DrawThingTriangle(const mline_t *lineguy, const int lineguylines,
 
         AM_Rotate(&x1, &y1, angle);
         AM_Rotate(&x2, &y2, angle);
+
+        if (am_correctaspectratio)
+        {
+            y1 = 5 * y1 / 6;
+            y2 = 5 * y2 / 6;
+        }
 
         AM_DrawFline(x + x1, y + y1, x + x2, y + y2, &color, putdot);
     }
@@ -1779,19 +1797,20 @@ static void AM_DrawPlayer(void)
     else
         angle = viewangle >> ANGLETOFINESHIFT;
 
-    AM_CorrectAspectRatio(&point);
+    if (am_correctaspectratio)
+        AM_CorrectAspectRatio(&point);
 
     if (viewplayer->cheats & (CF_ALLMAP | CF_ALLMAP_THINGS))
     {
         if (invisibility && (invisibility > STARTFLASHING || (invisibility & FLASHONTIC)))
-            AM_DrawTranslucentPlayerArrow(cheatplayerarrow, CHEATPLAYERARROWLINES, angle, point.x, point.y);
+            AM_DrawPlayerArrow(cheatplayerarrow, CHEATPLAYERARROWLINES, angle, point.x, point.y, &PUTTRANSLUCENTDOT);
         else
-            AM_DrawPlayerArrow(cheatplayerarrow, CHEATPLAYERARROWLINES, angle, point.x, point.y);
+            AM_DrawPlayerArrow(cheatplayerarrow, CHEATPLAYERARROWLINES, angle, point.x, point.y, putbigdot2);
     }
     else if (invisibility && (invisibility > STARTFLASHING || (invisibility & FLASHONTIC)))
-        AM_DrawTranslucentPlayerArrow(playerarrow, PLAYERARROWLINES, angle, point.x, point.y);
+        AM_DrawPlayerArrow(playerarrow, CHEATPLAYERARROWLINES, angle, point.x, point.y, &PUTTRANSLUCENTDOT);
     else
-        AM_DrawPlayerArrow(playerarrow, PLAYERARROWLINES, angle, point.x, point.y);
+        AM_DrawPlayerArrow(playerarrow, PLAYERARROWLINES, angle, point.x, point.y, putbigdot2);
 }
 
 #define THINGTRIANGLELINES  3
@@ -1833,7 +1852,8 @@ static void AM_DrawThings(void)
                 if (am_rotatemode)
                     AM_RotatePoint(&point);
 
-                AM_CorrectAspectRatio(&point);
+                if (am_correctaspectratio)
+                    AM_CorrectAspectRatio(&point);
 
                 if (!(flags & MF_SHOOTABLE) && !(flags & MF_CORPSE))
                     width = (12 << FRACBITS) >> FRACTOMAPBITS;
@@ -1866,7 +1886,8 @@ static void AM_DrawBloodSplats(void)
             if (am_rotatemode)
                 AM_RotatePoint(&point);
 
-            AM_CorrectAspectRatio(&point);
+            if (am_correctaspectratio)
+                AM_CorrectAspectRatio(&point);
 
             if ((fx = CXMTOF(point.x)) >= -BLOODSPLATWIDTH && fx <= MAPWIDTH + BLOODSPLATWIDTH
                 && (fy = CYMTOF(point.y)) >= -BLOODSPLATWIDTH && fy <= MAPHEIGHT + BLOODSPLATWIDTH)
@@ -1939,7 +1960,8 @@ static void AM_DrawMarks(const char *nums[])
         if (am_rotatemode)
             AM_RotatePoint(&point);
 
-        AM_CorrectAspectRatio(&point);
+        if (am_correctaspectratio)
+            AM_CorrectAspectRatio(&point);
 
         x = CXMTOF(point.x) - MARKWIDTH / 2 + 1;
         y = CYMTOF(point.y) - MARKHEIGHT / 2 - 1;
@@ -1997,47 +2019,39 @@ static void AM_DrawMarks(const char *nums[])
 
 static void AM_DrawPath(void)
 {
-    mpoint_t    end = { 0, 0 };
     mpoint_t    player = { viewx >> FRACTOMAPBITS, viewy >> FRACTOMAPBITS };
+    mpoint_t    end = player;
 
-    if (am_rotatemode)
+    for (int i = 1; i < numbreadcrumbs; i++)
     {
-        for (int i = 1; i < numbreadcrumbs; i++)
+        mpoint_t    start = { breadcrumb[i - 1].x >> FRACTOMAPBITS, breadcrumb[i - 1].y >> FRACTOMAPBITS };
+
+        end.x = breadcrumb[i].x >> FRACTOMAPBITS;
+        end.y = breadcrumb[i].y >> FRACTOMAPBITS;
+
+        if (ABS(start.x - end.x) > 4 * FRACUNIT || ABS(start.y - end.y) > 4 * FRACUNIT)
+            continue;
+
+        if (am_rotatemode)
         {
-            mpoint_t    start = { breadcrumb[i - 1].x >> FRACTOMAPBITS, breadcrumb[i - 1].y >> FRACTOMAPBITS };
-
-            end.x = breadcrumb[i].x >> FRACTOMAPBITS;
-            end.y = breadcrumb[i].y >> FRACTOMAPBITS;
-
-            if (ABS(start.x - end.x) > 4 * FRACUNIT || ABS(start.y - end.y) > 4 * FRACUNIT)
-                continue;
-
             AM_RotatePoint(&start);
             AM_RotatePoint(&end);
+        }
+
+        if (am_correctaspectratio)
+        {
             AM_CorrectAspectRatio(&start);
             AM_CorrectAspectRatio(&end);
-            AM_DrawFline(start.x, start.y, end.x, end.y, &pathcolor, putbigdot2);
         }
 
+        AM_DrawFline(start.x, start.y, end.x, end.y, &pathcolor, putbigdot2);
+    }
+
+    if (am_rotatemode)
         AM_RotatePoint(&player);
+
+    if (am_correctaspectratio)
         AM_CorrectAspectRatio(&player);
-    }
-    else
-    {
-        mpoint_t    start = { breadcrumb[0].x >> FRACTOMAPBITS, breadcrumb[0].y >> FRACTOMAPBITS };
-
-        for (int i = 1; i < numbreadcrumbs; i++)
-        {
-            end.x = breadcrumb[i].x >> FRACTOMAPBITS;
-            end.y = breadcrumb[i].y >> FRACTOMAPBITS;
-
-            if (ABS(start.x - end.x) > 4 * FRACUNIT || ABS(start.y - end.y) > 4 * FRACUNIT)
-                continue;
-
-            AM_DrawFline(start.x, start.y, end.x, end.y, &pathcolor, putbigdot2);
-            start = end;
-        }
-    }
 
     if (ABS(end.x - player.x) <= 4 * FRACUNIT && ABS(end.y - player.y) <= 4 * FRACUNIT)
         AM_DrawFline(end.x, end.y, player.x, player.y, &pathcolor, putbigdot2);
@@ -2190,11 +2204,7 @@ static void AM_SetFrameVariables(void)
 
         am_frame.sin = finesine[angle];
         am_frame.cos = finecosine[angle];
-
-        rotatelinefunc = &AM_RotateLine;
     }
-    else
-        rotatelinefunc = &AM_DoNotRotateLine;
 }
 
 static void AM_ApplyAntialiasing(void)
@@ -2261,7 +2271,7 @@ void AM_Drawer(void)
     else
         AM_DrawWalls();
 
-    if (am_path)
+    if (am_path && numbreadcrumbs > 0)
         AM_DrawPath();
 
     if (things)

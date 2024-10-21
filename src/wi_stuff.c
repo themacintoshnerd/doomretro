@@ -321,7 +321,7 @@ static wi_animation_t   *animation;
 static bool CheckConditions(interlevelcond_t *conditions, bool enteringcondition)
 {
     bool                conditionsmet = true;
-    int                 map = P_GetMapInEpisode((enteringcondition ? wbs->next : wbs->last) + 1);
+    int                 map = (enteringcondition ? wbs->next : wbs->last) + 1;
     interlevelcond_t    *condition;
 
     array_foreach(condition, conditions)
@@ -909,7 +909,7 @@ static void WI_InitNoState(void)
 {
     state = NoState;
     acceleratestage = false;
-    cnt = (gamemode == commercial ? TICRATE : 10);
+    cnt = (gamemode == commercial || animation ? TICRATE : 10);
 
     D_FadeScreen(false);
 }
@@ -1195,12 +1195,10 @@ static void WI_UpdateStats(void)
         {
             S_StartSound(NULL, sfx_sgcock);
 
-            if (NextLocAnimation())
+            if (NextLocAnimation() || gamemode != commercial)
                 WI_InitShowNextLoc();
-            else if (gamemode == commercial)
-                WI_InitNoState();
             else
-                WI_InitShowNextLoc();
+                WI_InitNoState();
         }
     }
     else if (sp_state & 1)
@@ -1563,4 +1561,8 @@ void WI_Start(wbstartstruct_t *wbstartstruct)
     }
 
     WI_InitStats();
+
+#if SDL_VERSION_ATLEAST(2, 24, 0)
+    SDL_ResetKeyboard();
+#endif
 }

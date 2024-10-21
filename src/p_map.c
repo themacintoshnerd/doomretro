@@ -445,7 +445,7 @@ static bool PIT_CheckThing(mobj_t *thing)
         return true;
 
     // [BH] nudge corpse or dropped item when walked over
-    if (((corpse && type != MT_BARREL) || (flags & MF_DROPPED)) && !thing->nudge && thing->floorz == tmthing->floorz
+    if (((corpse && type != MT_BARREL) || (flags & MF_DROPPED)) && !thing->nudge && tmthing->z == tmthing->floorz
         && ((tmflags & MF_SHOOTABLE) || ((tmflags & MF_CORPSE) && (tmthing->momx || tmthing->momy))) && r_corpses_nudge)
         if (P_ApproxDistance(thing->x - tmthing->x, thing->y - tmthing->y) < 16 * FRACUNIT)
         {
@@ -596,6 +596,12 @@ static bool PIT_CheckThing(mobj_t *thing)
 
             P_DamageMobj(thing, tmthing, tmthing->target, damage, true, false);
             numspechit = 0;
+
+            if (tmtype == MT_RIPPER)
+            {
+                viewplayer->shotssuccessful_calamityblade++;
+                stat_shotssuccessful_incinerator = SafeAdd(stat_shotssuccessful_calamityblade, 1);
+            }
 
             return true;
         }
@@ -1102,17 +1108,14 @@ bool P_TryMove(mobj_t *thing, const fixed_t x, const fixed_t y, const int dropof
 
     P_SetThingPosition(thing);
 
-    if (thing->player && thing->player->mo == thing)
+    if (thing->player && thing->player->mo == thing && (x != oldx || y != oldy))
     {
         const int   dist = P_ApproxDistance(x - oldx, y - oldy) >> FRACBITS;
 
-        if (dist)
-        {
-            stat_distancetraveled = SafeAdd(stat_distancetraveled, dist);
-            viewplayer->distancetraveled += dist;
+        stat_distancetraveled = SafeAdd(stat_distancetraveled, dist);
+        viewplayer->distancetraveled += dist;
 
-            AM_DropBreadCrumb();
-        }
+        AM_DropBreadCrumb();
     }
 
     // [BH] check if new sector is liquid and clip/unclip feet as necessary
