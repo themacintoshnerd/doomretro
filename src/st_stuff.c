@@ -290,8 +290,9 @@ cheatseq_t cheat_powerup[7] =
 
 static bool movekey(char key)
 {
-    return (key == keyboardright || key == keyboardleft || key == keyboardforward || key == keyboardforward2
-        || key == keyboardback || key == keyboardback2 || key == keyboardstrafeleft || key == keyboardstraferight);
+    return (key == keyboardright || key == keyboardright2 || key == keyboardleft
+        || key == keyboardforward || key == keyboardforward2 || key == keyboardback
+        || key == keyboardback2 || key == keyboardstrafeleft || key == keyboardstraferight);
 }
 
 static void ST_InitCheats(void)
@@ -979,7 +980,21 @@ bool ST_Responder(const event_t *ev)
 
                 cht_GetParam(&cheat_clev_xy, buffer);
 
-                if (gamemode == commercial)
+                if (legacyofrust)
+                {
+                    epsd = buffer[0] - '0';
+                    map = buffer[1] - '0';
+
+                    if (epsd <= 2 && map <= 7)
+                        map = (epsd - 1) * 7 + map;
+                    else if (epsd <= 2 && map == 8)
+                        map = 14 + epsd;
+                    else
+                        map = epsd * 10 + map;
+
+                    M_snprintf(lump, sizeof(lump), "MAP%02i", map);
+                }
+                else if (gamemode == commercial)
                 {
                     epsd = 1;
                     map = (buffer[0] - '0') * 10 + buffer[1] - '0';
@@ -1007,7 +1022,9 @@ bool ST_Responder(const event_t *ev)
                     S_StartSound(NULL, sfx_getpow);
                     ST_PlayerCheated(cheat_clev_xy.sequence, "xy", NULL, true);
 
-                    if (BTSX)
+                    if (legacyofrust && map != 99)
+                        M_snprintf(lump, sizeof(lump), "E%cM%c", buffer[0], buffer[1]);
+                    else if (BTSX)
                         M_snprintf(lump, sizeof(lump), "E%iM%c%c", (BTSXE1 ? 1 : (BTSXE2 ? 2 : 3)), buffer[0], buffer[1]);
 
                     if (M_StringCompare(lump, mapnum))

@@ -1386,6 +1386,11 @@ static void P_LoadSectors(int lump)
         ss->nextsec = -1;
         ss->prevsec = -1;
 
+        ss->oldceilinggametime = -1;
+        ss->oldfloorgametime = -1;
+        ss->oldceilingoffsetgametime = -1;
+        ss->oldflooroffsetgametime = -1;
+
         // [BH] Apply any level-specific fixes.
         if (canmodify && r_fixmaperrors && gamemode != shareware)
             for (int j = 0; sectorfix[j].mission != -1; j++)
@@ -2198,8 +2203,8 @@ static void P_LoadSideDefs2(int lump)
         sector_t        *sec;
         unsigned short  sector_num = SHORT(msd->sector);
 
-        sd->textureoffset = SHORT(msd->textureoffset) << FRACBITS;
-        sd->rowoffset = SHORT(msd->rowoffset) << FRACBITS;
+        sd->textureoffset = sd->basetextureoffset = sd->oldtextureoffset = SHORT(msd->textureoffset) << FRACBITS;
+        sd->rowoffset = sd->baserowoffset = SHORT(msd->rowoffset) << FRACBITS;
 
         // cph 09/30/06: catch out-of-range sector numbers; use sector 0 instead
         if (sector_num >= numsectors)
@@ -3215,8 +3220,7 @@ void P_SetupLevel(int ep, int map)
 
     if (!(samelevel = (lumpnum == prevlumpnum)))
     {
-        viewplayer->cheats &= ~CF_ALLMAP;
-        viewplayer->cheats &= ~CF_ALLMAP_THINGS;
+        viewplayer->cheats &= ~(CF_ALLMAP | CF_ALLMAP_THINGS);
         viewplayer->deaths = 0;
         viewplayer->suicides = 0;
     }
@@ -4368,7 +4372,7 @@ void P_Init(void)
                         if (!M_CheckParm("-nodmapinfo"))
                             P_ParseMapInfo("DMAPINFO");
 
-        if (nojump && (keyboardjump || mousejump != -1 || controllerjump))
+        if (nojump && (keyboardjump || keyboardjump2 || mousejump != -1 || controllerjump))
             C_Warning(1, "This %s has disabled use of the " BOLD("+jump") " action.",
                 (lumpinfo[MAPINFO]->wadfile->type == IWAD ? "IWAD" : "PWAD"));
 

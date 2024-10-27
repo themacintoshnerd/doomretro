@@ -2227,7 +2227,9 @@ bool C_Responder(event_t *ev)
                 {
                     bool    result = false;
 
-                    if (M_StringStartsWith(consoleinput, "bind ") || M_StringStartsWith(consoleinput, "unbind "))
+                    if (M_StringStartsWith(consoleinput, "bind ")
+                        || M_StringStartsWith(consoleinput, "unbind ")
+                        || M_StringStartsWith(consoleinput, "alias "))
                     {
                         if (C_ValidateInput(consoleinput))
                             result = true;
@@ -2374,7 +2376,8 @@ bool C_Responder(event_t *ev)
                     for (i = len - 1; i >= 0; i--)
                         if ((consoleinput[i] == ';'
                             && M_StringStartsWith(consoleinput, "bind")
-                            && M_StringStartsWith(consoleinput, "unbind"))
+                            && M_StringStartsWith(consoleinput, "unbind")
+                            && M_StringStartsWith(consoleinput, "alias"))
                             || (consoleinput[i] == '"'
                                 && M_StringStartsWith(consoleinput, "bind")))
                             break;
@@ -2654,6 +2657,7 @@ bool C_Responder(event_t *ev)
 
         if (ch >= CONSOLEFONTSTART
             && ch != keyboardconsole
+            && ch != keyboardconsole2
             && C_TextWidth(consoleinput, false, true)
                 + (ch == ' ' ? spacewidth : SHORT(consolefont[ch - CONSOLEFONTSTART]->width))
                 - (selectstart < selectend ? C_TextWidth((temp = M_SubString(consoleinput, selectstart,
