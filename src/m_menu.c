@@ -2913,7 +2913,7 @@ bool M_Responder(event_t *ev)
                 {
                     if (messagetoprint || helpscreen || !usingmouse)
                     {
-                        if (mousewait < I_GetTime())
+                        if (mousewait < I_GetTime() && !savestringenter)
                         {
                             key = KEY_ENTER;
                             mousewait = I_GetTime() + 8;
@@ -4363,8 +4363,7 @@ void M_Drawer(void)
                 M_DrawPatchWithShadow(x - 26, yy, skullpatch, true);
             }
 
-            for (int i = 0; i < MAXSCREENAREA; i++)
-                tempscreen[i] = PINK;
+            memset(tempscreen, PINK, MAXSCREENAREA);
 
             for (int i = 0; i < max; i++)
             {

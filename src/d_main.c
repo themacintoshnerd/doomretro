@@ -2869,19 +2869,31 @@ static void D_DoomMainSetup(void)
 
             G_DeferredInitNew(startskill, startepisode, startmap);
         }
-        else if (M_CheckParm("-nosplash"))
-        {
-            C_Warning(0, "A " BOLD("-nosplash") " parameter was found on the command-line. "
-                ITALICS(DOOMRETRO_NAME "'s") " splash screen wasn't displayed.");
-            menuactive = false;
-            splashscreen = false;
-            D_FadeScreen(false);
-            D_StartTitle(1);
-        }
         else
         {
-            splashpal = W_CacheLastLumpName("SPLSHPAL");
-            D_StartTitle(0);
+#if defined(_WIN32)
+            if (wad && previouswad && !M_StringCompare(wad, previouswad))
+            {
+                EpiDef.laston = episode = episode_default;
+                ExpDef.laston = expansion = expansion_default;
+                M_SaveCVARs();
+            }
+#endif
+
+            if (M_CheckParm("-nosplash"))
+            {
+                C_Warning(0, "A " BOLD("-nosplash") " parameter was found on the command-line. "
+                    ITALICS(DOOMRETRO_NAME "'s") " splash screen wasn't displayed.");
+                menuactive = false;
+                splashscreen = false;
+                D_FadeScreen(false);
+                D_StartTitle(1);
+            }
+            else
+            {
+                splashpal = W_CacheLastLumpName("SPLSHPAL");
+                D_StartTitle(0);
+            }
         }
     }
 
