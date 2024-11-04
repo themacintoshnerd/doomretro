@@ -3,7 +3,7 @@
 ### DOOM Retro v5.6
 
 * *DOOM Retro* is now built using v17.11.5 of [*Microsoft Visual Studio Community 2022*](https://visualstudio.microsoft.com/vs/community/).
-* *DOOM Retro* now uses [*SDL v2.30.8*](https://github.com/libsdl-org/SDL/releases/tag/release-2.30.8).
+* *DOOM Retro* now uses [*SDL v2.30.9*](https://github.com/libsdl-org/SDL/releases/tag/release-2.30.9).
 * Several changes have been made to further improve the overall performance and stability of *DOOM Retro*.
 * Minor changes have been made to text that is output to the console.
 * Minor improvements have been made to text autocompleted in the console by pressing the <kbd><b>TAB</b></kbd> key.
@@ -29,7 +29,7 @@
   * Adaptive translucency is now applied to projectiles fired by ghouls when the `r_sprites_translucency` CVAR is `on`.
 * A bug is fixed whereby [Andrew Hulshult’s](https://www.hulshult.com/) *IDKFA* soundtrack wasn’t being played in some maps when [`extras.wad`](https://doomwiki.org/wiki/Extras.wad) was autoloaded.
 * The volume of MP3 and Ogg Vorbis music lumps has increased slightly.
-* Minor improvements have been made to the support of [*Master Levels*](https://doomwiki.org/wiki/Master_Levels_for_Doom_II), [*SIGIL*](https://romero.com/sigil), [*Ancient Aliens*](https://www.doomworld.com/idgames/levels/doom2/Ports/megawads/aaliens) and  [*Back To Saturn X E2: Tower In The Fountain Of Sparks*](https://www.doomworld.com/forum/topic/69960).
+* Minor improvements have been made to the support of [*Master Levels*](https://doomwiki.org/wiki/Master_Levels_for_Doom_II), [*SIGIL*](https://romero.com/sigil),  [*Chex Quest*](https://doomwiki.org/wiki/Chex_Quest), [*Chex Quest 2*](https://doomwiki.org/wiki/Chex_Quest#Chex_Quest_2), [*Ancient Aliens*](https://www.doomworld.com/idgames/levels/doom2/Ports/megawads/aaliens) and  [*Back To Saturn X E2: Tower In The Fountain Of Sparks*](https://www.doomworld.com/forum/topic/69960).
 * These changes have been made to the support of `MAPINFO` lumps:
   * The order in which multiple `MAPINFO` lumps are loaded is now correct.
   * `EPISODE` is now parsed in more instances.
